@@ -36,6 +36,11 @@ const readComicInfoXML = async ({ entries, loadBlob }) => {
         return `${yyyyMm}-${String(day).padStart(2, '0')}`
     }
     const subjects = getSubjects()
+    // Free-text fields with no standard metadata slot, kept for library search.
+    const comicInfo = Object.fromEntries(['Penciller', 'Inker', 'Colorist', 'Letterer',
+        'CoverArtist', 'Editor', 'Translator', 'Characters', 'Teams', 'Locations',
+        'StoryArc', 'AlternateSeries', 'Imprint', 'Notes']
+        .map(name => [name, get(name)]).filter(([, value]) => value))
     return {
         title: get('Title'),
         publisher: get('Publisher'),
@@ -48,6 +53,7 @@ const readComicInfoXML = async ({ entries, loadBlob }) => {
         series: get('Series'),
         seriesPosition: get('Number'),
         seriesTotal: get('Count'),
+        comicInfo: Object.keys(comicInfo).length ? comicInfo : undefined,
     }
 }
 
@@ -127,6 +133,7 @@ export const makeComicBook = async ({ entries, loadBlob, getSize, getComment }, 
         description: merged.description,
         subject: merged.subject,
         identifier: merged.identifier,
+        comicInfo: merged.comicInfo,
     }
     if (merged.series) {
         const series = { name: merged.series }
