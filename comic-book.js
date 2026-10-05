@@ -48,6 +48,7 @@ const readComicInfoXML = async ({ entries, loadBlob }) => {
         series: get('Series'),
         seriesPosition: get('Number'),
         seriesTotal: get('Count'),
+        manga: get('Manga'),
     }
 }
 
@@ -118,6 +119,10 @@ export const makeComicBook = async ({ entries, loadBlob, getSize, getComment }, 
     const xml = await readComicInfoXML({ entries, loadBlob })
     const cbi = await readComicBookInfo({ getComment })
     const merged = { ...(cbi || {}), ...(xml || {}) }
+    // ComicInfo.xml marks manga read right to left as YesAndRightToLeft (plain
+    // Yes is only a genre flag); surface it as book.dir so the fixed-layout
+    // renderer pairs and orders spreads right-to-left
+    if (merged.manga?.toLowerCase() === 'yesandrighttoleft') book.dir = 'rtl'
     book.metadata = {
         title: merged.title || file.name,
         publisher: merged.publisher,
